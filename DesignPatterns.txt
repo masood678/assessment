@@ -1,0 +1,99 @@
+1. Higher-Order Component (HOC) Pattern:
+An HOC is a function that takes a component and returns a new component with additional functionality.
+It allows you to reuse component logic without altering the original component.
+HOCs are commonly used for adding authentication checks, data fetching, or adding extra behavior.
+
+Example:
+
+// HOC to add a loading spinner
+const withLoading = (WrappedComponent) => {
+  return function WithLoading(props) {
+    if (props.isLoading) {
+      return <p>Loading...</p>;
+    }
+    return <WrappedComponent {...props} />;
+  };
+};
+
+// Simple component to display user info
+const UserProfile = ({ name, age }) => (
+  <div>
+    <h1>{name}</h1>
+    <p>Age: {age}</p>
+  </div>
+);
+
+// Apply HOC to add loading functionality
+const UserProfileWithLoading = withLoading(UserProfile);
+
+Advantages:
+* Allows you to reuse logic in multiple components without duplication.
+* Keeps the UI components clean by separating logic into HOCs.
+* Adds new behavior to components in a flexible way.
+
+Disadvantages:
+* Can lead to deeply nested components if used excessively.
+* Needs careful handling of props to ensure that they are forwarded correctly.
+
+2. Compound Component Pattern:
+
+The Compound Component pattern is used when you have a set of components that need to share state. 
+The parent component manages the state and passes it down to the children via implicit context, allowing children to communicate with each other without explicitly passing props.
+
+Example:
+
+// Parent component that holds the state
+const Tabs = ({ children }) => {
+  const [activeTab, setActiveTab] = useState(0);
+
+  return (
+    <div>
+      <div className="tabs">
+        {React.Children.map(children, (child, index) =>
+          React.cloneElement(child, {
+            isActive: index === activeTab,
+            onActivate: () => setActiveTab(index),
+          })
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Tab component
+const Tab = ({ children, isActive, onActivate }) => {
+  return (
+    <button
+      className={isActive ? 'active' : ''}
+      onClick={onActivate}
+    >
+      {children}
+    </button>
+  );
+};
+
+// TabContent component
+const TabContent = ({ children, isActive }) => {
+  return isActive ? <div>{children}</div> : null;
+};
+
+// Usage
+const App = () => (
+  <Tabs>
+    <Tab>Tab 1</Tab>
+    <Tab>Tab 2</Tab>
+    <TabContent>Content for Tab 1</TabContent>
+    <TabContent>Content for Tab 2</TabContent>
+  </Tabs>
+);
+
+export default App;
+
+Advantages:
+* Shared state is controlled by the parent, while the child components focus on presentation.
+* Allows child components to be used in different contexts.
+* No Prop Drilling
+
+Disadvantage
+* Child components depend on the parent for shared state.
+* It may add unnecessary complexity for simple components or smaller projects.
